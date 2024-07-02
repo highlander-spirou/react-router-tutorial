@@ -7,7 +7,7 @@ const Profile = () => {
 
   useEffect(() => {
     if (profileId && !["A", "B", "C"].includes(profileId)) {
-      navigate("/*");
+      navigate("/*", { replace: true });
     }
   }, [profileId]);
 
