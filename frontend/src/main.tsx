@@ -1,14 +1,38 @@
 import ReactDOM from "react-dom/client";
-import App from "./App.tsx";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import "./index.css";
-import About from "./About.tsx";
+import Admin from "./layouts/admin.tsx";
+import Root from "./layouts/root.tsx";
+import Index from "./pages/index.tsx";
+import Profile from "./pages/profiles/profile.tsx";
+import Profiles from "./layouts/profile-layout.tsx";
+import ProfilesContent from "./pages/profiles/profiles.tsx";
+import Stats from "./pages/admin/stats.tsx";
+import ErrorPage from "./pages/error-page.tsx";
 
 const router = createBrowserRouter([
-  {path: '/', element: <App />},
-  {path: '/about', element: <About />},
-])
-
+  {
+    path: "/",
+    element: <Root />,
+    errorElement: <ErrorPage />,
+    children: [
+      { index: true, element: <Index /> },
+      {
+        path: "/profiles",
+        element: <Profiles />,
+        children: [
+          { index: true, element: <ProfilesContent /> },
+          { path: ":profileId", element: <Profile /> },
+        ],
+      },
+    ],
+  },
+  {
+    path: "/admin",
+    element: <Admin />,
+    children: [{ index: true, element: <Stats /> }],
+  },
+  { path: "*", element: <ErrorPage /> },
+]);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <RouterProvider router={router} />
