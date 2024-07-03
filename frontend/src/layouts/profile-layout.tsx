@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigation } from "react-router-dom";
 import ProfileSidebar from "../components/profile-sidebar";
 import { useEffect, useState } from "react";
 
@@ -16,6 +16,7 @@ const Profiles = () => {
 
     fetchLinks();
   }, []);
+
 
   return (
     <>

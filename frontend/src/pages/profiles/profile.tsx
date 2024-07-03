@@ -1,5 +1,13 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Suspense, useEffect, useState } from "react";
+import {
+  Await,
+  Link,
+  defer,
+  useAsyncValue,
+  useLoaderData,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 
 type ProfileInterface = {
   avatar: string;
@@ -9,25 +17,45 @@ type ProfileInterface = {
   note: string;
 };
 
+const fetchData = async (id) => {
+  const fetcher = await fetch(`http://localhost:3000/profiles/${id}`);
+  if (fetcher.ok) {
+    return await fetcher.json();
+  } else {
+    throw new Error();
+  }
+};
+
+export async function loader({ params }) {
+  const data = fetchData(params.profileId);
+  return defer({ data: data });
+}
+
+const MainUI = () => {
+  const profile = useAsyncValue() as ProfileInterface;
+  return (
+    <>
+      <div className="flex gap-1">
+        <div className="avatar">
+          <div className="mask mask-squircle w-24 bg-gray-200">
+            <img className="profile-avatar" src={profile.avatar} />
+          </div>
+        </div>
+        <div>
+          <p>
+            {profile.first_name} {profile.last_name}
+          </p>
+          <p>{profile.note}</p>
+        </div>
+      </div>
+    </>
+  );
+};
+
 const Profile = () => {
   const { profileId } = useParams();
-  const navigate = useNavigate();
-  const [profile, setProfile] = useState<null | ProfileInterface>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const fetcher = await fetch(
-        `http://localhost:3000/profiles/${profileId}`
-      );
-      if (fetcher.ok) {
-        const data = await fetcher.json();
-        setProfile(data);
-      } else {
-        navigate("/*", { replace: true });
-      }
-    };
-    fetchData();
-  }, [profileId]);
+  const data = useLoaderData() as { data: ProfileInterface };
 
   return (
     <>
@@ -82,24 +110,12 @@ const Profile = () => {
             </li>
           </ul>
         </div>
-        {!profile ? (
-          <div>Loading ...</div>
-        ) : (
-          <>
-            <div>Profile: {profileId}</div>
-            <div className="flex gap-1">
-              <div className="avatar">
-                <div className="mask mask-squircle w-24 bg-gray-200">
-                  <img className="profile-avatar" src={profile.avatar} />
-                </div>
-              </div>
-              <div>
-                <p>{profile.first_name} {profile.last_name}</p>
-                <p>{profile.note}</p>
-              </div>
-            </div>
-          </>
-        )}
+
+        <Suspense fallback={<p>Loading...</p>}>
+          <Await resolve={data.data} errorElement={<p>Error</p>}>
+            <MainUI />
+          </Await>
+        </Suspense>
       </div>
     </>
   );

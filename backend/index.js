@@ -1,13 +1,13 @@
 import express from "express";
 import bodyParser from "body-parser";
 import fs from "fs";
-import cors from 'cors'
+import cors from "cors";
 const app = express();
 const PORT = 3000;
 const DATA_FILE = "profiles.json";
 
 app.use(bodyParser.json());
-app.use(cors())
+app.use(cors());
 
 // Helper function to read profiles from file
 const readProfiles = () => {
@@ -32,26 +32,44 @@ app.post("/profiles", (req, res) => {
     avatar: `https://robohash.org/${newId}.png?size=200x200`,
     ...req.body,
   };
-  profiles.push(newProfile);
-  writeProfiles(profiles);
-  res.status(201).json(newProfile);
+
+  // profiles.push(newProfile);
+  // writeProfiles(profiles);
+  // res.status(201).json(newProfile);
+
+  setTimeout(() => {
+    profiles.push(newProfile);
+    writeProfiles(profiles);
+    res.status(201).json(newProfile);
+  }, 5000);
 });
 
 // READ all profiles
 app.get("/profiles", (req, res) => {
   const profiles = readProfiles();
-  res.json(profiles);
+  setTimeout(() => {
+    res.json(profiles);
+  }, 5000);
+});
+
+app.get("/profiles/search", (req, res) => {
+  // const profiles = readProfiles();
+  setTimeout(() => {
+    res.json({searchResults: "Something " + req.body});
+  }, 5000);
 });
 
 // READ a profile by id
 app.get("/profiles/:id", (req, res) => {
   const profiles = readProfiles();
   const profile = profiles.find((p) => p.id === parseInt(req.params.id, 10));
-  if (profile) {
-    res.json(profile);
-  } else {
-    res.status(404).send("Profile not found");
-  }
+  setTimeout(() => {
+    if (profile) {
+      res.json(profile);
+    } else {
+      res.status(404).send("Profile not found");
+    }
+  }, 5000);
 });
 
 // UPDATE a profile by id
@@ -60,13 +78,15 @@ app.put("/profiles/:id", (req, res) => {
   const profileIndex = profiles.findIndex(
     (p) => p.id === parseInt(req.params.id, 10)
   );
-  if (profileIndex !== -1) {
-    profiles[profileIndex] = { id: profiles[profileIndex].id, ...req.body };
-    writeProfiles(profiles);
-    res.json(profiles[profileIndex]);
-  } else {
-    res.status(404).send("Profile not found");
-  }
+  setTimeout(() => {
+    if (profileIndex !== -1) {
+      profiles[profileIndex] = { id: profiles[profileIndex].id, ...req.body };
+      writeProfiles(profiles);
+      res.json(profiles[profileIndex]);
+    } else {
+      res.status(404).send("Profile not found");
+    }
+  }, 5000);
 });
 
 // DELETE a profile by id
@@ -75,12 +95,14 @@ app.delete("/profiles/:id", (req, res) => {
   const newProfiles = profiles.filter(
     (p) => p.id !== parseInt(req.params.id, 10)
   );
-  if (newProfiles.length !== profiles.length) {
-    writeProfiles(newProfiles);
-    res.status(204).send();
-  } else {
-    res.status(404).send("Profile not found");
-  }
+  setTimeout(() => {
+    if (newProfiles.length !== profiles.length) {
+      writeProfiles(newProfiles);
+      res.status(204).send();
+    } else {
+      res.status(404).send("Profile not found");
+    }
+  }, 5000);
 });
 
 app.listen(PORT, () => {

@@ -2,6 +2,7 @@ import { Link, Outlet } from "react-router-dom";
 import "../index.css";
 
 const Root = () => {
+
   return (
     <>
       <div className="navbar bg-base-300">

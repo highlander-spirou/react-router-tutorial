@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@remix-run/router':
+    specifier: ^1.17.0
+    version: 1.17.0
   lodash.debounce:
     specifier: ^4.0.8
     version: 4.0.8

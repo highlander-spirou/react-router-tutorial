@@ -12,5 +12,12 @@
     "first_name": "asd",
     "last_name": "asd",
     "note": "something"
+  },
+  {
+    "id": 3,
+    "avatar": "https://robohash.org/3.png?size=200x200",
+    "first_name": "abc",
+    "last_name": "abc",
+    "note": "abc"
   }
 ]

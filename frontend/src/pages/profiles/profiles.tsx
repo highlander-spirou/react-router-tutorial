@@ -1,10 +1,6 @@
-import {
-  Form,
-  redirect,
-  useSearchParams,
-  useSubmit,
-} from "react-router-dom";
-import debounce from 'lodash.debounce'
+import { Form, redirect, useSearchParams, useSubmit } from "react-router-dom";
+import debounce from "lodash.debounce";
+import { useEffect, useState } from "react";
 
 export const action = async ({ request, params }) => {
   switch (request.method) {
@@ -31,9 +27,12 @@ export const action = async ({ request, params }) => {
   }
 };
 
+
+
 const ProfilesContent = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const submit = useSubmit();
+  const [searchResult, setSearchResult] = useState("");
 
   const searchProfileHandler = (e) => {
     const prevSearch = searchParams.get("search");
@@ -42,7 +41,20 @@ const ProfilesContent = () => {
     });
   };
 
-  const debounceSearchProfile = debounce(searchProfileHandler, 5000)
+  const debounceSearchProfile = debounce(searchProfileHandler, 700);
+
+  useEffect(() => {
+    const fetchSearch = async () => {
+      const fetcher = await fetch("http://localhost:3000/profiles/search");
+      if (fetcher.ok) {
+        const data = await fetcher.json();
+        setSearchResult("Search found");
+      } else {
+        setSearchResult("Search not found");
+      }
+    };
+    fetchSearch();
+  });
 
   return (
     <>
@@ -88,6 +100,9 @@ const ProfilesContent = () => {
           onChange={(e) => debounceSearchProfile(e.currentTarget.form)}
         />
       </Form>
+      <div>
+        Search result: {searchResult}
+      </div>
     </>
   );
 };

@@ -3,9 +3,11 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import Admin from "./layouts/admin.tsx";
 import Root from "./layouts/root.tsx";
 import Index from "./pages/index.tsx";
-import Profile from "./pages/profiles/profile.tsx";
+import Profile, { loader as ProfileLoader } from "./pages/profiles/profile.tsx";
 import Profiles from "./layouts/profile-layout.tsx";
-import ProfilesContent, {action as ProfilesAction} from "./pages/profiles/profiles.tsx";
+import ProfilesContent, {
+  action as ProfilesAction,
+} from "./pages/profiles/profiles.tsx";
 import Stats from "./pages/admin/stats.tsx";
 import ErrorPage from "./pages/error-page.tsx";
 
@@ -21,7 +23,7 @@ const router = createBrowserRouter([
         element: <Profiles />,
         children: [
           { index: true, element: <ProfilesContent />, action: ProfilesAction },
-          { path: ":profileId", element: <Profile /> },
+          { path: ":profileId", element: <Profile />, loader: ProfileLoader },
         ],
       },
     ],
