@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "avatar": "https://robohash.org/1.png?size=200x200",
+    "first_name": "a",
+    "last_name": "b",
+    "note": ""
+  },
+  {
+    "id": 2,
+    "avatar": "https://robohash.org/2.png?size=200x200",
+    "first_name": "asd",
+    "last_name": "asd",
+    "note": "something"
+  }
+]

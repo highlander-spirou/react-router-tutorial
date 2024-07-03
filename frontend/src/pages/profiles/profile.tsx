@@ -1,14 +1,32 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+
+type ProfileInterface = {
+  avatar: string;
+  first_name: string;
+  id: number;
+  last_name: string;
+  note: string;
+};
 
 const Profile = () => {
   const { profileId } = useParams();
   const navigate = useNavigate();
+  const [profile, setProfile] = useState<null | ProfileInterface>(null);
 
   useEffect(() => {
-    if (profileId && !["A", "B", "C"].includes(profileId)) {
-      navigate("/*", { replace: true });
-    }
+    const fetchData = async () => {
+      const fetcher = await fetch(
+        `http://localhost:3000/profiles/${profileId}`
+      );
+      if (fetcher.ok) {
+        const data = await fetcher.json();
+        setProfile(data);
+      } else {
+        navigate("/*", { replace: true });
+      }
+    };
+    fetchData();
   }, [profileId]);
 
   return (
@@ -64,7 +82,24 @@ const Profile = () => {
             </li>
           </ul>
         </div>
-        <div>Profile: {profileId}</div>
+        {!profile ? (
+          <div>Loading ...</div>
+        ) : (
+          <>
+            <div>Profile: {profileId}</div>
+            <div className="flex gap-1">
+              <div className="avatar">
+                <div className="mask mask-squircle w-24 bg-gray-200">
+                  <img className="profile-avatar" src={profile.avatar} />
+                </div>
+              </div>
+              <div>
+                <p>{profile.first_name} {profile.last_name}</p>
+                <p>{profile.note}</p>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </>
   );

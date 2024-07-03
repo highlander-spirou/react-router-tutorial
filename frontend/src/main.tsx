@@ -5,7 +5,7 @@ import Root from "./layouts/root.tsx";
 import Index from "./pages/index.tsx";
 import Profile from "./pages/profiles/profile.tsx";
 import Profiles from "./layouts/profile-layout.tsx";
-import ProfilesContent from "./pages/profiles/profiles.tsx";
+import ProfilesContent, {action as ProfilesAction} from "./pages/profiles/profiles.tsx";
 import Stats from "./pages/admin/stats.tsx";
 import ErrorPage from "./pages/error-page.tsx";
 
@@ -20,7 +20,7 @@ const router = createBrowserRouter([
         path: "/profiles",
         element: <Profiles />,
         children: [
-          { index: true, element: <ProfilesContent /> },
+          { index: true, element: <ProfilesContent />, action: ProfilesAction },
           { path: ":profileId", element: <Profile /> },
         ],
       },
