@@ -1,38 +1,52 @@
-import { Form, redirect, useSearchParams, useSubmit } from "react-router-dom";
+import {
+  Await,
+  Form,
+  Link,
+  defer,
+  useLoaderData,
+  useNavigation,
+  useSearchParams,
+  useSubmit,
+} from "react-router-dom";
 import debounce from "lodash.debounce";
-import { useEffect, useState } from "react";
+import { Suspense } from "react";
+import { ProfileInterface } from "../../types";
+import { QueryClient, useQuery } from "@tanstack/react-query";
+import { searchProfilesQuery } from "./profiles.query";
+import ErrorPage from "../error-page";
 
-export const action = async ({ request, params }) => {
-  switch (request.method) {
-    case "POST": {
-      let formData = await request.formData();
-      const updates = Object.fromEntries(formData);
-      const fetcher = await fetch("http://localhost:3000/profiles", {
-        method: "POST",
-        body: JSON.stringify(updates),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (fetcher.ok) {
-        const newProfile = await fetcher.json();
-        return redirect(`/profiles/${newProfile.id}`);
-      } else {
-        throw new Response("", { status: 400 });
-      }
-    }
-    default: {
-      throw new Response("", { status: 405 });
-    }
-  }
+export const loader =
+  (queryClient: QueryClient) =>
+  async ({ request }): Promise<any> => {
+    const url = new URL(request.url);
+    const q = url.searchParams.get("search");
+    return defer({ data: queryClient.ensureQueryData(searchProfilesQuery(q)) });
+  };
+
+const ProfilesSection = ({ q }) => {
+  const { data: profiles } = useQuery<ProfileInterface[]>(
+    searchProfilesQuery(q)
+  );
+  return (
+    <>
+      <div className="grid grid-cols-3 gap-3">
+        {profiles.map((x) => (
+          <Link
+            key={x.id}
+            to={`${x.id}`}
+            className="link"
+          >{`${x.first_name} ${x.last_name}`}</Link>
+        ))}
+      </div>
+    </>
+  );
 };
 
-
-
 const ProfilesContent = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, _] = useSearchParams();
   const submit = useSubmit();
-  const [searchResult, setSearchResult] = useState("");
+  const { data } = useLoaderData() as { data: any };
+  const navigation = useNavigation();
 
   const searchProfileHandler = (e) => {
     const prevSearch = searchParams.get("search");
@@ -43,50 +57,12 @@ const ProfilesContent = () => {
 
   const debounceSearchProfile = debounce(searchProfileHandler, 700);
 
-  useEffect(() => {
-    const fetchSearch = async () => {
-      const fetcher = await fetch("http://localhost:3000/profiles/search");
-      if (fetcher.ok) {
-        const data = await fetcher.json();
-        setSearchResult("Search found");
-      } else {
-        setSearchResult("Search not found");
-      }
-    };
-    fetchSearch();
-  });
-
   return (
     <>
-      <Form method="POST" className="mt-5 ml-5 w-80 flex flex-col gap-3">
-        <label className="input input-bordered flex items-center gap-2">
-          First Name
-          <input
-            type="text"
-            className="grow"
-            placeholder="Daisy"
-            name="first_name"
-          />
-        </label>
-        <label className="input input-bordered flex items-center gap-2">
-          Last Name
-          <input
-            type="text"
-            className="grow"
-            placeholder="UI"
-            name="last_name"
-          />
-        </label>
-        <textarea
-          className="textarea textarea-bordered"
-          placeholder="Bio"
-          name="note"
-        ></textarea>
-        <button type="submit" className="btn">
-          Submit
-        </button>
-      </Form>
-      <Form role="search" className="mt-5 ml-5">
+      <Link to="new" className="btn">
+        New Profile
+      </Link>
+      <Form role="search" className="mt-5 ml-5 flex gap-3 items-center">
         <input
           type="text"
           name="search"
@@ -99,10 +75,17 @@ const ProfilesContent = () => {
           }
           onChange={(e) => debounceSearchProfile(e.currentTarget.form)}
         />
+        <span
+          className={`loading loading-dots loading-lg ${
+            navigation.state === "idle" && "hidden"
+          }`}
+        ></span>
       </Form>
-      <div>
-        Search result: {searchResult}
-      </div>
+      <Suspense fallback={<p>Loading...</p>}>
+        <Await resolve={data} errorElement={<ErrorPage />}>
+          <ProfilesSection q={searchParams.get("search")} />
+        </Await>
+      </Suspense>
     </>
   );
 };
