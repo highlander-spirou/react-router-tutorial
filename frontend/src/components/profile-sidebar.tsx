@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { NavLink as RRNavLink } from "react-router-dom";
-import type { ProfileInterface } from "../types";
 import { FetchedIcon, IsFetchingIcon } from "./fetching-status";
 import { profilesParams } from "@/pages/profiles/query/params";
+import { ProfileInterface } from "@/pages/profiles/types";
 
 const NavLink = ({ label, link }) => {
   return <RRNavLink to={`${link}`}>Profile {label}</RRNavLink>;
