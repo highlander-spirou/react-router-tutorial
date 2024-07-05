@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { NavLink as RRNavLink } from "react-router-dom";
-import { profilesQuery } from "../pages/profiles/profiles.query";
 import type { ProfileInterface } from "../types";
 import { FetchedIcon, IsFetchingIcon } from "./fetching-status";
+import { profilesParams } from "@/pages/profiles/query/params";
 
 const NavLink = ({ label, link }) => {
   return <RRNavLink to={`${link}`}>Profile {label}</RRNavLink>;
@@ -17,7 +17,7 @@ const ProfileSidebar = ({ children }) => {
     data: links,
     isLoading,
     isFetching,
-  } = useQuery<ProfileInterface[]>(profilesQuery());
+  } = useQuery<ProfileInterface[]>(profilesParams());
 
   return (
     <>
