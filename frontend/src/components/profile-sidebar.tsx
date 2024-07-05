@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { NavLink as RRNavLink } from "react-router-dom";
-import type { ProfileInterface } from "../pages/profiles/types";
+import { profilesQuery } from "../pages/profiles/profiles.query";
+import type { ProfileInterface } from "../types";
 import { FetchedIcon, IsFetchingIcon } from "./fetching-status";
-import { profilesParams } from "@/pages/profiles/query/params";
 
 const NavLink = ({ label, link }) => {
   return <RRNavLink to={`${link}`}>Profile {label}</RRNavLink>;
@@ -17,15 +17,13 @@ const ProfileSidebar = ({ children }) => {
     data: links,
     isLoading,
     isFetching,
-  } = useQuery<ProfileInterface[]>(profilesParams());
+  } = useQuery<ProfileInterface[]>(profilesQuery());
 
   return (
     <>
       <div className="drawer lg:drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-        <div className="drawer-content">
-          {children}
-        </div>
+        <div className="drawer-content">{children}</div>
         <div className="drawer-side">
           <label
             htmlFor="my-drawer-2"
@@ -33,11 +31,20 @@ const ProfileSidebar = ({ children }) => {
             className="drawer-overlay"
           ></label>
           <ul className="menu bg-base-200 text-base-content min-h-screen w-60 p-4">
-            {links.map((x, index) => (
-              <li key={index}>
-                <NavLink to={`${x}`}>Sidebar Item {x}</NavLink>
-              </li>
-            ))}
+            <p className="w-full inline-flex justify-end">
+              {isFetching ? <IsFetchingIcon /> : <FetchedIcon />}
+            </p>
+            {isLoading ? (
+              <NavLinkLoading />
+            ) : (
+              <>
+                {links.map((x, index) => (
+                  <li key={index} className="mt-1">
+                    <NavLink label={x.first_name} link={x.id} />
+                  </li>
+                ))}
+              </>
+            )}
           </ul>
         </div>
       </div>

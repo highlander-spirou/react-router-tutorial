@@ -1,7 +1,7 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useRouteError } from "react-router-dom";
 
 const ErrorPage = () => {
+  const error = useRouteError() as any;
   return (
     <>
       <div className="h-screen justify-center">
@@ -101,7 +101,9 @@ const ErrorPage = () => {
               <span>4 0 4</span>
             </span>
             <span className="text-gray-500 text-xl">
-              Sorry, We couldn't find what you are looking for!
+              {error?.message
+                ? error.message
+                : "Sorry, We couldn't find what you are looking for!"}
             </span>
           </div>
         </center>

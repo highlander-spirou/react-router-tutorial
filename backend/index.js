@@ -2,6 +2,8 @@ import express from "express";
 import bodyParser from "body-parser";
 import fs from "fs";
 import cors from "cors";
+import { matchSorter } from "match-sorter";
+
 const app = express();
 const PORT = 3000;
 const DATA_FILE = "profiles.json";
@@ -49,14 +51,8 @@ app.get("/profiles", (req, res) => {
   const profiles = readProfiles();
   setTimeout(() => {
     res.json(profiles);
-  }, 5000);
-});
-
-app.get("/profiles/search", (req, res) => {
-  // const profiles = readProfiles();
-  setTimeout(() => {
-    res.json({searchResults: "Something " + req.body});
-  }, 5000);
+  }, 3000);
+  // res.json(profiles);
 });
 
 // READ a profile by id
@@ -70,6 +66,11 @@ app.get("/profiles/:id", (req, res) => {
       res.status(404).send("Profile not found");
     }
   }, 5000);
+  // if (profile) {
+  //   res.json(profile);
+  // } else {
+  //   res.status(404).send("Profile not found");
+  // }
 });
 
 // UPDATE a profile by id
@@ -78,15 +79,27 @@ app.put("/profiles/:id", (req, res) => {
   const profileIndex = profiles.findIndex(
     (p) => p.id === parseInt(req.params.id, 10)
   );
-  setTimeout(() => {
-    if (profileIndex !== -1) {
-      profiles[profileIndex] = { id: profiles[profileIndex].id, ...req.body };
-      writeProfiles(profiles);
-      res.json(profiles[profileIndex]);
-    } else {
-      res.status(404).send("Profile not found");
-    }
-  }, 5000);
+  // setTimeout(() => {
+  //   if (profileIndex !== -1) {
+  //     profiles[profileIndex] = { id: profiles[profileIndex].id, ...req.body };
+  //     writeProfiles(profiles);
+  //     res.json(profiles[profileIndex]);
+  //   } else {
+  //     res.status(404).send("Profile not found");
+  //   }
+  // }, 5000);
+  if (profileIndex !== -1) {
+    const oldProfile = profiles[profileIndex];
+    profiles[profileIndex] = {
+      id: profiles[profileIndex].id,
+      ...oldProfile,
+      ...req.body,
+    };
+    writeProfiles(profiles);
+    res.json(profiles[profileIndex]);
+  } else {
+    res.status(404).send("Profile not found");
+  }
 });
 
 // DELETE a profile by id
@@ -95,13 +108,33 @@ app.delete("/profiles/:id", (req, res) => {
   const newProfiles = profiles.filter(
     (p) => p.id !== parseInt(req.params.id, 10)
   );
+  // setTimeout(() => {
+  //   if (newProfiles.length !== profiles.length) {
+  //     writeProfiles(newProfiles);
+  //     res.status(204).send();
+  //   } else {
+  //     res.status(404).send("Profile not found");
+  //   }
+  // }, 5000);
+  if (newProfiles.length !== profiles.length) {
+    writeProfiles(newProfiles);
+    res.status(204).send();
+  } else {
+    res.status(404).send("Profile not found");
+  }
+});
+
+app.post("/profiles/search", (req, res) => {
+  const profiles = readProfiles();
+  const { q } = req.body;
+
+  const matched = !q
+    ? profiles
+    : matchSorter(profiles, q, {
+        keys: ["first_name", "last_name"],
+      });
   setTimeout(() => {
-    if (newProfiles.length !== profiles.length) {
-      writeProfiles(newProfiles);
-      res.status(204).send();
-    } else {
-      res.status(404).send("Profile not found");
-    }
+    res.json(matched);
   }, 5000);
 });
 
