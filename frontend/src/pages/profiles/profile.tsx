@@ -8,31 +8,25 @@ import {
   useNavigate,
   useParams,
 } from "react-router-dom";
+import { Suspense } from "react";
+import Breadscrums from "../../components/breadcrums";
+import type { ProfileInterface } from "./types";
+import { FetchedIcon, IsFetchingIcon } from "../../components/fetching-status";
+import ErrorPage from "../error-page";
+import { profileParams } from "./query/params";
 
-type ProfileInterface = {
-  avatar: string;
-  first_name: string;
-  id: number;
-  last_name: string;
-  note: string;
-};
+export const loader =
+  (queryClient: QueryClient) =>
+  async ({ params }): Promise<any> => {
+    const id = params.profileId;
+    return defer({ data: queryClient.ensureQueryData(profileParams(id)) });
+  };
 
-const fetchData = async (id) => {
-  const fetcher = await fetch(`http://localhost:3000/profiles/${id}`);
-  if (fetcher.ok) {
-    return await fetcher.json();
-  } else {
-    throw new Error();
-  }
-};
-
-export async function loader({ params }) {
-  const data = fetchData(params.profileId);
-  return defer({ data: data });
-}
-
-const MainUI = () => {
-  const profile = useAsyncValue() as ProfileInterface;
+const AsyncView = () => {
+  const { profileId } = useParams();
+  const { data: profile, isFetching } = useQuery<ProfileInterface>(
+    profileParams(profileId)
+  );
   return (
     <>
       <div className="flex gap-1">

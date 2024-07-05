@@ -1,6 +1,24 @@
-import { NavLink } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { NavLink as RRNavLink } from "react-router-dom";
+import type { ProfileInterface } from "../pages/profiles/types";
+import { FetchedIcon, IsFetchingIcon } from "./fetching-status";
+import { profilesParams } from "@/pages/profiles/query/params";
 
-const ProfileSidebar = ({ children, links }) => {
+const NavLink = ({ label, link }) => {
+  return <RRNavLink to={`${link}`}>Profile {label}</RRNavLink>;
+};
+
+const NavLinkLoading = () => {
+  return <div className="skeleton h-8 w-full"></div>;
+};
+
+const ProfileSidebar = ({ children }) => {
+  const {
+    data: links,
+    isLoading,
+    isFetching,
+  } = useQuery<ProfileInterface[]>(profilesParams());
+
   return (
     <>
       <div className="drawer lg:drawer-open">
